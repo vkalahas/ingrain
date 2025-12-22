@@ -27,6 +27,7 @@
 	},
 	"dependencies": {
 		"obsidian": "latest",
+		"openai": "^6.15.0",
 		"react": "^19.2.3",
 		"react-dom": "^19.2.3"
 	}

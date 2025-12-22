@@ -43,6 +43,10 @@ Ingrain Plugin Styles
 	box-shadow: 0 0 0 2px var(--interactive-accent-hover);
 }
 
+#ingrain-ai-response {
+	margin-bottom: 1rem;
+}
+
 .ingrain-textarea::placeholder {
 	color: var(--text-faint);
 }
@@ -77,4 +81,73 @@ Ingrain Plugin Styles
 	margin: 1rem;
 	gap: 1rem;
 	justify-content: center;
+}
+
+.difficulty-tooltip {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	margin-left: 0.5rem;
+}
+
+.tooltip-icon {
+	cursor: help;
+	color: var(--text-muted);
+	font-size: 1.2em;
+	transition: color 0.2s ease;
+}
+
+.tooltip-icon:hover {
+	color: var(--text-normal);
+}
+
+.difficulty-tooltip .tooltip-text {
+	visibility: hidden;
+	opacity: 0;
+	width: 250px;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+	text-align: center;
+	border-radius: 6px;
+	padding: 8px 12px;
+	position: absolute;
+	z-index: 1000;
+	bottom: 125%;
+	left: 50%;
+	transform: translateX(-50%);
+	transition: opacity 0.3s ease, visibility 0.3s ease;
+	font-size: 0.85em;
+	line-height: 1.4;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	border: 1px solid var(--background-modifier-border);
+}
+
+.difficulty-tooltip .tooltip-text::after {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	border-width: 5px;
+	border-style: solid;
+	border-color: var(--background-secondary) transparent transparent transparent;
+}
+
+.difficulty-tooltip:hover .tooltip-text {
+	visibility: visible;
+	opacity: 1;
+}
+
+.spinner {
+	display: inline-block;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }

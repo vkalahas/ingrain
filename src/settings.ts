@@ -2,11 +2,11 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import Ingrain from "./main";
 
 export interface IngrainSettings {
-	mySetting: string;
+	apiKey: string;
 }
 
 export const DEFAULT_SETTINGS: IngrainSettings = {
-	mySetting: 'default'
+	apiKey: ''
 }
 
 export class IngrainSettingTab extends PluginSettingTab {
@@ -23,13 +23,13 @@ export class IngrainSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('AI API key')
-			.setDesc('Enables AI question generation.')
+			.setName('API key')
+			.setDesc('Enter your API key to enable AI question generation')
 			.addText(text => text
-				.setPlaceholder('Enter your API key here.')
-				.setValue(this.plugin.settings.mySetting)
+				.setPlaceholder('Enter your API key')
+				.setValue(this.plugin.settings.apiKey)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.apiKey = value;
 					await this.plugin.saveSettings();
 				}));
 	}
