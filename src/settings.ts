@@ -1,18 +1,18 @@
-import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "./main";
+import { App, PluginSettingTab, Setting } from "obsidian";
+import Ingrain from "./main";
 
-export interface MyPluginSettings {
+export interface IngrainSettings {
 	mySetting: string;
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+export const DEFAULT_SETTINGS: IngrainSettings = {
 	mySetting: 'default'
 }
 
-export class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+export class IngrainSettingTab extends PluginSettingTab {
+	plugin: Ingrain;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: Ingrain) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -23,10 +23,10 @@ export class SampleSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc('It\'s a secret')
+			.setName('AI API key')
+			.setDesc('Enables AI question generation.')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
+				.setPlaceholder('Enter your API key here.')
 				.setValue(this.plugin.settings.mySetting)
 				.onChange(async (value) => {
 					this.plugin.settings.mySetting = value;

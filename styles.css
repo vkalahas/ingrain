@@ -1,8 +1,80 @@
 /*
-
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
+Ingrain Plugin Styles
 */
+
+.ingrain-react-modal {
+	padding: 0;
+}
+
+.ingrain-modal-content {
+	padding: 20px;
+}
+
+.ingrain-modal-content h2 {
+	margin: 0 0 16px 0;
+	font-size: 1.5em;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.ingrain-sample-text {
+	margin: 0 0 16px 0;
+	color: var(--text-muted);
+	line-height: 1.5;
+}
+
+.ingrain-textarea {
+	width: 100%;
+	min-width: 400px;
+	padding: 12px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-family: inherit;
+	font-size: 14px;
+	resize: vertical;
+	transition: border-color 0.15s ease;
+}
+
+.ingrain-textarea:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+.ingrain-textarea::placeholder {
+	color: var(--text-faint);
+}
+
+.difficulty-button {
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+.difficulty-buttons {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 1rem;
+	gap: 1rem;
+}
+
+.easy-button {
+	background-color: green;
+}
+
+.medium-button {
+	background-color: yellow;
+}
+
+.hard-button {
+	background-color: red;
+}
+
+.control-buttons {
+	display: flex;
+	margin: 1rem;
+	gap: 1rem;
+	justify-content: center;
+}
