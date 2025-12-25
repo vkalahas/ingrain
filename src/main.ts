@@ -1,22 +1,29 @@
 import { Plugin, TFile } from 'obsidian';
 import { DEFAULT_SETTINGS, IngrainSettings, IngrainSettingTab } from "./settings";
-import { ReactModal } from "./ui/ReactModal";
+import { ReviewModal } from "./ui/ReviewModal";
 import { PluginData, DEFAULT_DATA, DEFAULT_NOTE_DATA } from "./NoteReviewData";
 import OpenAI from 'openai';
 
 export default class Ingrain extends Plugin {
 	settings: IngrainSettings;
 	data: PluginData;
-	notes: TFile[] = []
+	notes: TFile[] = [];
+	private currentAbortController: AbortController | null = null;
+	
+	// Single modal instance - reused across opens/closes
+	private reviewModal: ReviewModal | null = null;
 
 	async onload() {
 		await this.loadSettings();
 		await this.loadReviewData();
 
 		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('sprout', 'Sample', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new ReactModal(this.app, this).open();
+		this.addRibbonIcon('sprout', 'Ingrain', () => {
+			// Create modal once, reuse thereafter
+			if (!this.reviewModal) {
+				this.reviewModal = new ReviewModal(this.app, this);
+			}
+			this.reviewModal.open();
 		});
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
@@ -52,12 +59,12 @@ export default class Ingrain extends Plugin {
 					const existing = this.notes.find((f) => f.path === oldPath);
 					if (existing) existing.path = file.path;
 					
-				// Update review data with new path
-				if (this.data.notes[oldPath]) {
-					this.data.notes[file.path] = this.data.notes[oldPath];
-					delete this.data.notes[oldPath];
-					void this.saveReviewData();
-				}
+					// Update review data with new path
+					if (this.data.notes[oldPath]) {
+						this.data.notes[file.path] = this.data.notes[oldPath];
+						delete this.data.notes[oldPath];
+						void this.saveReviewData();
+					}
 				}
 			})
 		);
@@ -67,16 +74,21 @@ export default class Ingrain extends Plugin {
 			this.app.workspace.on("file-open", (file) => {
 				if (!file || !(file instanceof TFile) || file.extension !== "md") return;
 
-			const path = file.path;
-			const note = this.data.notes[path] ?? { ...DEFAULT_NOTE_DATA };
-			note.lastSeen = Date.now();
-			this.data.notes[path] = note;
-			void this.saveReviewData();
+				const path = file.path;
+				const note = this.data.notes[path] ?? { ...DEFAULT_NOTE_DATA };
+				note.lastSeen = Date.now();
+				this.data.notes[path] = note;
+				void this.saveReviewData();
 			})
 		);
 	}
 
 	onunload() {
+		// Clean up modal if it exists
+		if (this.reviewModal) {
+			this.reviewModal.close();
+			this.reviewModal = null;
+		}
 	}
 
 	async loadSettings() {
@@ -104,6 +116,16 @@ export default class Ingrain extends Plugin {
 		void this.saveReviewData();
 	}
 
+	// Mark a note as reviewed (updates lastReviewed and lastSeen timestamps)
+	markAsReviewed(filePath: string) {
+		const note = this.data.notes[filePath] ?? { ...DEFAULT_NOTE_DATA };
+		const now = Date.now();
+		note.lastReviewed = now;
+		note.lastSeen = now;
+		this.data.notes[filePath] = note;
+		void this.saveReviewData();
+	}
+
 	// Get the oldest note based on lastSeen timestamp, excluding specified paths
 	getOldestNote(excludePaths: Set<string> = new Set()): TFile | null {
 		if (this.notes.length === 0) return null;
@@ -127,11 +149,26 @@ export default class Ingrain extends Plugin {
 		return oldest;
 	}
 
+	// Abort any pending AI request
+	abortCurrentRequest() {
+		if (this.currentAbortController) {
+			this.currentAbortController.abort();
+			this.currentAbortController = null;
+		}
+	}
+
 	// Generate quiz questions using OpenAI API
 	async generateQuiz(note: TFile): Promise<string> {
 		if (!this.settings.apiKey) {
 			return "Error: OpenAI API key not configured. Please add your API key in settings.";
 		}
+
+		// Abort any previous request
+		this.abortCurrentRequest();
+
+		// Create new abort controller for this request
+		this.currentAbortController = new AbortController();
+		const signal = this.currentAbortController.signal;
 
 		try {
 			// Read the note content
@@ -145,18 +182,23 @@ export default class Ingrain extends Plugin {
 
 			// Call OpenAI API using the client
 			const completion = await openai.chat.completions.create({
-				model: "gpt-4o-mini",
+				model: "gpt-5-mini",
 				messages: [
 					{
 						role: "user",
-						content: `Quiz me on this note. Give me 5 questions.\n\n${content}`
+						content: `Quiz me on this note. Give me 3 questions in an ordered list. Ensure proper markdown formatting for Obsidian. Don't mention or ask any follow up questions. \n\n${content}`
 					}
-				],
-				temperature: 0.7
-			});
+				]
+			}, { signal });
 
+			this.currentAbortController = null;
 			return completion.choices[0]?.message?.content || "No response generated.";
 		} catch (error) {
+			this.currentAbortController = null;
+			// Don't show error message if request was aborted
+			if (error instanceof Error && error.name === 'AbortError') {
+				return "";
+			}
 			const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
 			return `Error: ${errorMessage}`;
 		}
@@ -180,15 +222,14 @@ export default class Ingrain extends Plugin {
 				...conversationHistory,
 				{
 					role: "user",
-					content: userInput
+					content: `Give me the answers in an ordered list and an Obsidian markdown formatted feedback paragraph after and nothing else. Ensure that the answers are accurate. ${userInput}`
 				}
 			];
 
 			// Call OpenAI API using the client
 			const completion = await openai.chat.completions.create({
-				model: "gpt-4o-mini",
+				model: "gpt-5-mini",
 				messages: messages as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-				temperature: 0.7
 			});
 
 			return completion.choices[0]?.message?.content || "No response generated.";

@@ -61,6 +61,29 @@ Quick starting guide for new plugin devs:
 - Together with a custom eslint [plugin](https://github.com/eslint-plugin) for Obsidan specific code guidelines.
 - A GitHub action is preconfigured to automatically lint every commit on all branches.
 
+## Testing
+
+This project uses [Vitest](https://vitest.dev/) for unit testing.
+
+### Running tests
+
+```bash
+# Run tests in watch mode (recommended for development)
+npm test
+
+# Run tests once and exit
+npm run test:run
+
+# Run tests with UI
+npm run test:ui
+```
+
+### Test coverage
+
+- **27 tests** covering data structures, settings, and core plugin functionality
+- Tests are located in the `tests/` directory
+- See [tests/README.md](tests/README.md) for more details
+
 ## Funding URL
 
 You can include funding URLs where people who use your plugin can financially support it.
