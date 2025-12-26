@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS: IngrainSettings = {
 
 export class IngrainSettingTab extends PluginSettingTab {
 	plugin: Ingrain;
+	name = 'Ingrain';
 
 	constructor(app: App, plugin: Ingrain) {
 		super(app, plugin);
