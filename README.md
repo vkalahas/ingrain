@@ -15,3 +15,4 @@ To learn deeply, you need to *use* what you know.
 
 - Spaced Repetition Algorithm
 - Filter by folder and/or tags
+- Allow Skip while generating quiz
