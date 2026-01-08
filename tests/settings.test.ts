@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DEFAULT_SETTINGS, IngrainSettings } from '../src/settings';
+import { DEFAULT_SETTINGS, BoomerangSettings } from '../src/settings';
 
 describe('Settings', () => {
 	describe('DEFAULT_SETTINGS', () => {
@@ -7,15 +7,15 @@ describe('Settings', () => {
 			expect(DEFAULT_SETTINGS.apiKey).toBe('');
 		});
 
-		it('should be a valid IngrainSettings object', () => {
+		it('should be a valid BoomerangSettings object', () => {
 			expect(DEFAULT_SETTINGS).toHaveProperty('apiKey');
 			expect(typeof DEFAULT_SETTINGS.apiKey).toBe('string');
 		});
 	});
 
-	describe('IngrainSettings interface', () => {
+	describe('BoomerangSettings interface', () => {
 		it('should accept valid API key', () => {
-			const settings: IngrainSettings = {
+			const settings: BoomerangSettings = {
 				apiKey: 'sk-test-key-123',
 			};
 
@@ -23,7 +23,7 @@ describe('Settings', () => {
 		});
 
 		it('should allow spreading DEFAULT_SETTINGS', () => {
-			const customSettings: IngrainSettings = {
+			const customSettings: BoomerangSettings = {
 				...DEFAULT_SETTINGS,
 				apiKey: 'custom-key',
 			};
@@ -32,7 +32,7 @@ describe('Settings', () => {
 		});
 
 		it('should handle empty API key', () => {
-			const settings: IngrainSettings = {
+			const settings: BoomerangSettings = {
 				apiKey: '',
 			};
 

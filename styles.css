@@ -1,29 +1,29 @@
 /*
-Ingrain Plugin Styles
+Boomerang Plugin Styles
 */
 
-.ingrain-modal {
+.boomerang-modal {
 	padding: 0;
 }
 
-.ingrain-modal-content {
+.boomerang-modal-content {
 	padding: 20px;
 }
 
-.ingrain-modal-content h2 {
+.boomerang-modal-content h2 {
 	margin: 0 0 16px 0;
 	font-size: 1.5em;
 	font-weight: 600;
 	color: var(--text-normal);
 }
 
-.ingrain-sample-text {
+.boomerang-sample-text {
 	margin: 0 0 16px 0;
 	color: var(--text-muted);
 	line-height: 1.5;
 }
 
-.ingrain-note-link {
+.boomerang-note-link {
 	color: var(--link-color);
 	cursor: pointer;
 	text-decoration: underline;
@@ -32,18 +32,18 @@ Ingrain Plugin Styles
 	transition: color 0.15s ease, text-decoration-color 0.15s ease;
 }
 
-.ingrain-note-link:hover {
+.boomerang-note-link:hover {
 	color: var(--link-color-hover);
 	text-decoration-color: var(--link-color-hover);
 }
 
-.ingrain-note-link:focus {
+.boomerang-note-link:focus {
 	outline: 2px solid var(--interactive-accent);
 	outline-offset: 2px;
 	border-radius: 2px;
 }
 
-.ingrain-textarea {
+.boomerang-textarea {
 	width: 100%;
 	min-width: 400px;
 	padding: 12px;
@@ -57,13 +57,13 @@ Ingrain Plugin Styles
 	transition: border-color 0.15s ease;
 }
 
-.ingrain-textarea:focus {
+.boomerang-textarea:focus {
 	outline: none;
 	border-color: var(--interactive-accent);
 	box-shadow: 0 0 0 2px var(--interactive-accent-hover);
 }
 
-#ingrain-ai-response {
+#boomerang-ai-response {
 	margin-bottom: 1rem;
 	min-height: 200px;
 	max-height: 500px;
@@ -74,7 +74,7 @@ Ingrain Plugin Styles
 	background: var(--background-primary);
 }
 
-.ingrain-response-container pre {
+.boomerang-response-container pre {
 	margin: 0.5em 0;
 	padding: 0.75em;
 	border-radius: 4px;
@@ -82,58 +82,58 @@ Ingrain Plugin Styles
 	overflow-x: auto;
 }
 
-.ingrain-response-container code {
+.boomerang-response-container code {
 	font-family: var(--font-monospace);
 	font-size: 0.9em;
 }
 
-.ingrain-response-container p {
+.boomerang-response-container p {
 	margin: 0.5em 0;
 }
 
-.ingrain-response-container ul,
-.ingrain-response-container ol {
+.boomerang-response-container ul,
+.boomerang-response-container ol {
 	margin: 0.5em 0;
 	padding-left: 1.5em;
 }
 
-.ingrain-response-container h1,
-.ingrain-response-container h2,
-.ingrain-response-container h3,
-.ingrain-response-container h4,
-.ingrain-response-container h5,
-.ingrain-response-container h6 {
+.boomerang-response-container h1,
+.boomerang-response-container h2,
+.boomerang-response-container h3,
+.boomerang-response-container h4,
+.boomerang-response-container h5,
+.boomerang-response-container h6 {
 	margin: 0.75em 0 0.5em 0;
 }
 
-.ingrain-response-container blockquote {
+.boomerang-response-container blockquote {
 	margin: 0.5em 0;
 	padding-left: 1em;
 	border-left: 3px solid var(--interactive-accent);
 	color: var(--text-muted);
 }
 
-.ingrain-response-container .math {
+.boomerang-response-container .math {
 	overflow-x: auto;
 }
 
-.ingrain-response-container table {
+.boomerang-response-container table {
 	width: 100%;
 	border-collapse: collapse;
 	margin: 0.5em 0;
 }
 
-.ingrain-response-container th,
-.ingrain-response-container td {
+.boomerang-response-container th,
+.boomerang-response-container td {
 	padding: 0.5em;
 	border: 1px solid var(--background-modifier-border);
 }
 
-.ingrain-response-container th {
+.boomerang-response-container th {
 	background: var(--background-secondary);
 }
 
-.ingrain-textarea::placeholder {
+.boomerang-textarea::placeholder {
 	color: var(--text-faint);
 }
 
@@ -235,7 +235,7 @@ Ingrain Plugin Styles
 	vertical-align: middle;
 }
 
-.ingrain-loading {
+.boomerang-loading {
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
@@ -243,7 +243,7 @@ Ingrain Plugin Styles
 	color: var(--text-muted);
 }
 
-.ingrain-loading .spinner {
+.boomerang-loading .spinner {
 	width: 18px;
 	height: 18px;
 }

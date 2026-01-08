@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import Ingrain from '../src/main';
+import Boomerang from '../src/main';
 import { TFile } from 'obsidian';
 import { DEFAULT_NOTE_DATA } from '../src/NoteReviewData';
 
-describe('Ingrain Plugin', () => {
-	let plugin: Ingrain;
+describe('Boomerang Plugin', () => {
+	let plugin: Boomerang;
 
 	beforeEach(() => {
-		plugin = new Ingrain({} as any, {} as any);
+		plugin = new Boomerang({} as any, {} as any);
 		plugin.data = { notes: {} };
 		plugin.notes = [];
 	});

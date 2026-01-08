@@ -1,19 +1,19 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import Ingrain from "./main";
+import Boomerang from "./main";
 
-export interface IngrainSettings {
+export interface BoomerangSettings {
 	apiKey: string;
 }
 
-export const DEFAULT_SETTINGS: IngrainSettings = {
+export const DEFAULT_SETTINGS: BoomerangSettings = {
 	apiKey: ''
 }
 
-export class IngrainSettingTab extends PluginSettingTab {
-	plugin: Ingrain;
-	name = 'Ingrain';
+export class BoomerangSettingTab extends PluginSettingTab {
+	plugin: Boomerang;
+	name = 'Boomerang';
 
-	constructor(app: App, plugin: Ingrain) {
+	constructor(app: App, plugin: Boomerang) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}

@@ -1,13 +1,20 @@
 import { App, Component, MarkdownRenderer, Modal, TFile } from "obsidian";
-import type Ingrain from "../main";
+import type Boomerang from "../main";
 
 interface Message {
 	role: string;
 	content: string;
 }
 
+type ReviewStatus =
+	| "idle"
+	| "loadingQuiz"
+	| "awaitingUserInput"
+	| "submittingAnswer"
+	| "awaitingNextNote";
+
 export class ReviewModal extends Modal {
-	private plugin: Ingrain;
+	private plugin: Boomerang;
 
 	// State - persists across open/close since we reuse the same instance
 	private currentNote: TFile | null = null;
@@ -15,9 +22,7 @@ export class ReviewModal extends Modal {
 	private conversationHistory: Message[] = [];
 	private skippedPaths = new Set<string>();
 	private inputValue = "";
-	private isLoading = false;
-	private isSubmitting = false;
-	private hasSubmittedAnswer = false;
+	private status: ReviewStatus = "idle";
 	private hasInitializedSession = false;
 
 	// UI elements
@@ -34,7 +39,7 @@ export class ReviewModal extends Modal {
 	// Keyboard handler reference for cleanup
 	private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
 
-	constructor(app: App, plugin: Ingrain) {
+	constructor(app: App, plugin: Boomerang) {
 		super(app);
 		this.plugin = plugin;
 	}
@@ -42,7 +47,7 @@ export class ReviewModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.addClass("ingrain-modal");
+		contentEl.addClass("boomerang-modal");
 
 		this.buildUI();
 		this.registerKeyboardShortcuts();
@@ -69,23 +74,25 @@ export class ReviewModal extends Modal {
 		const { contentEl } = this;
 
 		// Create modal content wrapper
-		const wrapper = contentEl.createDiv({ cls: "ingrain-modal-content" });
+		const wrapper = contentEl.createDiv({ cls: "boomerang-modal-content" });
 
 		// Header
 		wrapper.createEl("h2", { text: "Review" });
 
 		// Note info paragraph
-		const infoParagraph = wrapper.createEl("p", { cls: "ingrain-sample-text" });
-		infoParagraph.appendText("You haven't looked at this note in a while: ");
-
+		const infoParagraph = wrapper.createEl("p", { cls: "boomerang-sample-text" });
+		
 		this.noteLinkEl = infoParagraph.createEl("strong", {
-			cls: "ingrain-note-link",
+			cls: "boomerang-note-link",
 			text: this.currentNote?.basename ?? "No notes found",
 			attr: {
 				role: "button",
 				tabindex: "0",
 			},
 		});
+
+		infoParagraph.appendText(" is coming back at you!");
+
 		this.noteLinkEl.addEventListener("click", () => this.handleOpenNote());
 		this.noteLinkEl.addEventListener("keydown", (e) => {
 			if (e.key === "Enter" || e.key === " ") {
@@ -96,13 +103,13 @@ export class ReviewModal extends Modal {
 
 		// AI Response container
 		this.responseContainerEl = wrapper.createDiv({
-			cls: "ingrain-response-container markdown-rendered",
-			attr: { id: "ingrain-ai-response" },
+			cls: "boomerang-response-container markdown-rendered",
+			attr: { id: "boomerang-ai-response" },
 		});
 
 		// Textarea
 		this.textareaEl = wrapper.createEl("textarea", {
-			cls: "ingrain-textarea",
+			cls: "boomerang-textarea",
 			attr: {
 				placeholder: "Type something here...",
 				rows: "6",
@@ -156,13 +163,13 @@ export class ReviewModal extends Modal {
 		if (note) {
 			this.generateQuizForNote(note);
 		} else {
-			this.isLoading = false;
+			this.status = "idle";
 			this.updateResponseDisplay();
 		}
 	}
 
 	private generateQuizForNote(note: TFile) {
-		this.isLoading = true;
+		this.status = "loadingQuiz";
 		this.aiResponse = "";
 		this.conversationHistory = [];
 		this.updateResponseDisplay();
@@ -187,7 +194,7 @@ export class ReviewModal extends Modal {
 				];
 
 				this.aiResponse = response;
-				this.isLoading = false;
+				this.status = "awaitingUserInput";
 				this.updateResponseDisplay();
 				this.updateButtonStates();
 			});
@@ -195,7 +202,12 @@ export class ReviewModal extends Modal {
 	}
 
 	private handleSkip() {
-		if (!this.currentNote || this.isLoading || this.isSubmitting || this.hasSubmittedAnswer) {
+		if (
+			!this.currentNote ||
+			this.status === "loadingQuiz" ||
+			this.status === "submittingAnswer" ||
+			this.status === "awaitingNextNote"
+		) {
 			return;
 		}
 
@@ -211,7 +223,7 @@ export class ReviewModal extends Modal {
 
 		// Clear input and reset state
 		this.inputValue = "";
-		this.hasSubmittedAnswer = false;
+		this.status = "idle";
 		if (this.textareaEl) {
 			this.textareaEl.value = "";
 		}
@@ -225,11 +237,15 @@ export class ReviewModal extends Modal {
 	}
 
 	private async handleSubmit() {
-		if (!this.currentNote || !this.inputValue.trim() || this.isSubmitting) {
+		if (
+			!this.currentNote ||
+			!this.inputValue.trim() ||
+			this.status === "submittingAnswer"
+		) {
 			return;
 		}
 
-		this.isSubmitting = true;
+		this.status = "submittingAnswer";
 		this.updateResponseDisplay();
 		this.updateButtonStates();
 
@@ -251,7 +267,7 @@ export class ReviewModal extends Modal {
 			this.plugin.markAsReviewed(this.currentNote.path);
 
 			// Mark that user has submitted an answer
-			this.hasSubmittedAnswer = true;
+			this.status = "awaitingNextNote";
 
 			// Clear input
 			this.inputValue = "";
@@ -261,19 +277,18 @@ export class ReviewModal extends Modal {
 
 			// Update response
 			this.aiResponse = response;
-			this.isSubmitting = false;
 			this.updateResponseDisplay();
 			this.updateButtonStates();
 		} catch (error) {
-			this.isSubmitting = false;
 			this.aiResponse = `Error: ${error instanceof Error ? error.message : "Unknown error"}`;
+			this.status = "awaitingUserInput";
 			this.updateResponseDisplay();
 			this.updateButtonStates();
 		}
 	}
 
 	private handleNext() {
-		if (!this.currentNote || !this.hasSubmittedAnswer) {
+		if (!this.currentNote || this.status !== "awaitingNextNote") {
 			return;
 		}
 
@@ -289,7 +304,7 @@ export class ReviewModal extends Modal {
 
 		// Clear input and reset state
 		this.inputValue = "";
-		this.hasSubmittedAnswer = false;
+		this.status = "idle";
 		if (this.textareaEl) {
 			this.textareaEl.value = "";
 		}
@@ -323,10 +338,15 @@ export class ReviewModal extends Modal {
 		this.responseContainerEl.empty();
 
 		// Show spinner for loading states
-		if (this.isLoading || this.isSubmitting) {
-			const loadingContainer = this.responseContainerEl.createDiv({ cls: "ingrain-loading" });
+		if (
+			this.status === "loadingQuiz" ||
+			this.status === "submittingAnswer"
+		) {
+			const loadingContainer = this.responseContainerEl.createDiv({ cls: "boomerang-loading" });
 			loadingContainer.createSpan({ cls: "spinner" });
-			loadingContainer.createSpan({ text: this.isLoading ? "Loading" : "Thinking" });
+			loadingContainer.createSpan({
+				text: this.status === "loadingQuiz" ? "Loading" : "Thinking",
+			});
 			return;
 		}
 
@@ -348,16 +368,20 @@ export class ReviewModal extends Modal {
 
 	private updateButtonStates() {
 		if (this.skipButtonEl) {
-			this.skipButtonEl.disabled = this.isLoading || this.isSubmitting || this.hasSubmittedAnswer;
+			this.skipButtonEl.disabled =
+				this.status === "loadingQuiz" ||
+				this.status === "submittingAnswer" ||
+				this.status === "awaitingNextNote";
 		}
 
 		if (this.submitButtonEl) {
-			this.submitButtonEl.disabled = this.isSubmitting || !this.inputValue.trim();
+			this.submitButtonEl.disabled =
+				this.status === "submittingAnswer" || !this.inputValue.trim();
 			this.updateSubmitButtonContent();
 		}
 
 		if (this.nextButtonEl) {
-			this.nextButtonEl.disabled = !this.hasSubmittedAnswer || this.isSubmitting;
+			this.nextButtonEl.disabled = this.status !== "awaitingNextNote";
 		}
 	}
 
@@ -366,7 +390,7 @@ export class ReviewModal extends Modal {
 		const cmdKey = "⌘";
 
 		this.submitButtonEl.empty();
-		if (this.isSubmitting) {
+		if (this.status === "submittingAnswer") {
 			this.submitButtonEl.appendText("Sending\u00A0");
 			this.submitButtonEl.createSpan({ cls: "spinner" });
 		} else {

@@ -1,6 +1,6 @@
 {
-	"id": "ingrain",
-	"name": "Ingrain",
+	"id": "boomerang",
+	"name": "Boomerang",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Obsidian plugin that helps you retain and deeply understand knowledge.",

@@ -1,11 +1,11 @@
-import { Plugin, TFile } from 'obsidian';
-import { DEFAULT_SETTINGS, IngrainSettings, IngrainSettingTab } from "./settings";
+import { Plugin, TFile, addIcon } from 'obsidian';
+import { DEFAULT_SETTINGS, BoomerangSettings, BoomerangSettingTab } from "./settings";
 import { ReviewModal } from "./ui/ReviewModal";
 import { PluginData, DEFAULT_DATA, DEFAULT_NOTE_DATA } from "./NoteReviewData";
 import OpenAI from 'openai';
 
-export default class Ingrain extends Plugin {
-	settings: IngrainSettings;
+export default class Boomerang extends Plugin {
+	settings: BoomerangSettings;
 	data: PluginData;
 	notes: TFile[] = [];
 	private currentAbortController: AbortController | null = null;
@@ -18,7 +18,7 @@ export default class Ingrain extends Plugin {
 		await this.loadReviewData();
 
 		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('sprout', 'Ingrain', () => {
+		this.addRibbonIcon('rocket', 'Boomerang', () => {
 			// Create modal once, reuse thereafter
 			if (!this.reviewModal) {
 				this.reviewModal = new ReviewModal(this.app, this);
@@ -31,9 +31,9 @@ export default class Ingrain extends Plugin {
 		statusBarItemEl.setText('Status bar text');
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new IngrainSettingTab(this.app, this));
+		this.addSettingTab(new BoomerangSettingTab(this.app, this));
 
-		// ingrain get notes
+		// boomerang get notes
 		this.notes = this.app.vault.getMarkdownFiles();
 
 		// Keep in sync with changes
@@ -92,7 +92,7 @@ export default class Ingrain extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<IngrainSettings>);
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<BoomerangSettings>);
 	}
 
 	async saveSettings() {
@@ -186,7 +186,7 @@ export default class Ingrain extends Plugin {
 				messages: [
 					{
 						role: "user",
-						content: `Quiz me on this note. Give me 3 questions in an ordered list. Ensure proper markdown formatting for Obsidian. Don't mention or ask any follow up questions. \n\n${content}`
+						content: `Quiz me on this note. Give me 3 varied questions in an ordered list. Randomize the focus across different sections of the note each time. Ensure proper markdown formatting for Obsidian. Don't mention or ask any follow up questions. \n\n${content}`
 					}
 				]
 			}, { signal });
